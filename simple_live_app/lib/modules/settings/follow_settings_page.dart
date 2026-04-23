@@ -6,6 +6,7 @@ import 'package:simple_live_app/services/follow_service.dart';
 import 'package:simple_live_app/widgets/settings/settings_action.dart';
 import 'package:simple_live_app/widgets/settings/settings_card.dart';
 import 'package:simple_live_app/widgets/settings/settings_switch.dart';
+import 'package:simple_live_app/modules/settings/follow_appearance_settings.dart';
 import 'dart:io';
 
 class FollowSettingsPage extends GetView<AppSettingsController> {
@@ -56,9 +57,8 @@ class FollowSettingsPage extends GetView<AppSettingsController> {
                 Obx(
                   () {
                     var threadCount = controller.updateFollowThreadCount.value;
-                    var displayValue = threadCount == 0
-                        ? "自动 (根据 CPU 核心数)"
-                        : "$threadCount";
+                    var displayValue =
+                        threadCount == 0 ? "自动 (根据 CPU 核心数)" : "$threadCount";
 
                     return SettingsAction(
                       title: "更新并发数",
@@ -70,6 +70,8 @@ class FollowSettingsPage extends GetView<AppSettingsController> {
                     );
                   },
                 ),
+                AppStyle.divider,
+                FollowAppearanceSettings(controller: controller),
               ],
             ),
           ),

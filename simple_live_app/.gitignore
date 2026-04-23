@@ -51,3 +51,9 @@ pubspec.lock
 .fvm/
 
 /android/app/.cxx
+
+# Keystore and signing related
+*.jks
+*.keystore
+key.properties
+local.properties

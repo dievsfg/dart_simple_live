@@ -51,6 +51,9 @@ class RoutePath {
   /// 关注设置
   static const kSettingsFollow = "/settings/follow";
 
+  /// 自定义排序管理
+  static const kCustomSortManager = "/settings/follow/custom_sort";
+
   /// BiliBili Web登录
   static const kBiliBiliWebLogin = "/settings/account/bilibili/web_login";
 

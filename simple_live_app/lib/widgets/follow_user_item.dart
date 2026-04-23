@@ -4,6 +4,7 @@ import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/sites.dart';
+import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/widgets/net_image.dart';
 import 'dart:ui' as ui;
@@ -106,12 +107,33 @@ class FollowUserItem extends StatelessWidget {
           else if (item.liveStatus.value == 2 && item.liveStartTime != null)
             Padding(
               padding: AppStyle.edgeInsetsL8,
-              child: Text(
-                '开播了${formatLiveDuration(item.liveStartTime)}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '开播了${formatLiveDuration(item.liveStartTime)}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  if (item.liveOnline != null && item.liveOnline! > 0) ...[
+                    AppStyle.hGap8,
+                    const Icon(
+                      Remix.fire_fill,
+                      color: Colors.grey,
+                      size: 12,
+                    ),
+                    AppStyle.hGap4,
+                    Text(
+                      Utils.onlineToString(item.liveOnline!),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
         ],

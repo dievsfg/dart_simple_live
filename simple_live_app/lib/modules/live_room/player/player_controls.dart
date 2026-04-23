@@ -296,6 +296,7 @@ Widget buildFullControls(
                     ),
                   ),
                   const Expanded(child: Center()),
+                  const FullscreenClock(),
                   Visibility(
                     visible: !Platform.isAndroid && !Platform.isIOS,
                     child: IconButton(
@@ -1041,6 +1042,54 @@ class _PlayerSuperChatOverlayState extends State<PlayerSuperChatOverlay> {
             ),
           ),
       ],
+    );
+  }
+}
+
+class FullscreenClock extends StatefulWidget {
+  const FullscreenClock({Key? key}) : super(key: key);
+
+  @override
+  State<FullscreenClock> createState() => _FullscreenClockState();
+}
+
+class _FullscreenClockState extends State<FullscreenClock> {
+  late Timer _timer;
+  String _timeString = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _updateTime();
+    _timer =
+        Timer.periodic(const Duration(seconds: 1), (Timer t) => _updateTime());
+  }
+
+  void _updateTime() {
+    final now = DateTime.now();
+    final h = now.hour.toString().padLeft(2, '0');
+    final m = now.minute.toString().padLeft(2, '0');
+    final s = now.second.toString().padLeft(2, '0');
+    setState(() {
+      _timeString = "$h:$m:$s";
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      _timeString,
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+      ),
     );
   }
 }

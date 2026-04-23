@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
+import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
@@ -11,6 +12,7 @@ import 'package:simple_live_app/routes/app_navigation.dart';
 import 'package:simple_live_app/services/follow_service.dart';
 import 'package:simple_live_app/widgets/filter_button.dart';
 import 'package:simple_live_app/widgets/follow_user_item.dart';
+import 'package:simple_live_app/widgets/follow_user_card.dart';
 import 'package:simple_live_app/widgets/page_grid_view.dart';
 
 class FollowUserPage extends GetView<FollowUserController> {
@@ -82,6 +84,17 @@ class FollowUserPage extends GetView<FollowUserController> {
                     ],
                   ),
                 ),
+                PopupMenuItem(
+                  value: 5,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Remix.layout_grid_line),
+                      AppStyle.hGap12,
+                      Text("切换列表样式"),
+                    ],
+                  ),
+                ),
               ];
             },
             onSelected: (value) {
@@ -95,6 +108,11 @@ class FollowUserPage extends GetView<FollowUserController> {
                 FollowService.instance.inputText();
               } else if (value == 4) {
                 showTagsManager();
+              } else if (value == 5) {
+                var current =
+                    AppSettingsController.instance.followListStyle.value;
+                AppSettingsController.instance
+                    .setFollowListStyle(current == 0 ? 1 : 0);
               }
             },
           ),
@@ -148,30 +166,56 @@ class FollowUserPage extends GetView<FollowUserController> {
             ),
           ),
           Expanded(
-            child: PageGridView(
-              crossAxisSpacing: 12,
-              crossAxisCount: count,
-              pageController: controller,
-              firstRefresh: true,
-              showPCRefreshButton: false,
-              itemBuilder: (_, i) {
-                var item = controller.list[i];
-                var site = Sites.allSites[item.siteId]!;
-                return FollowUserItem(
-                  item: item,
-                  onRemove: () {
-                    controller.removeItem(item);
-                  },
-                  onTap: () {
-                    AppNavigator.toLiveRoomDetail(
-                        site: site, roomId: item.roomId);
-                  },
-                  onLongPress: () {
-                    setFollowTagDialog(item);
-                  },
-                );
-              },
-            ),
+            child: Obx(() {
+              var isGrid =
+                  AppSettingsController.instance.followListStyle.value == 1;
+              int currentCount = isGrid
+                  ? (MediaQuery.of(context).size.width ~/ 180).clamp(2, 6)
+                  : count;
+
+              return PageGridView(
+                padding: isGrid
+                    ? const EdgeInsets.only(top: 12.0, left: 12.0, right: 12.0)
+                    : null,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: isGrid ? 12 : 0,
+                crossAxisCount: currentCount,
+                pageController: controller,
+                firstRefresh: true,
+                showPCRefreshButton: false,
+                itemBuilder: (_, i) {
+                  var item = controller.list[i];
+                  var site = Sites.allSites[item.siteId]!;
+
+                  if (isGrid) {
+                    return FollowUserCard(
+                      item: item,
+                      onTap: () {
+                        AppNavigator.toLiveRoomDetail(
+                            site: site, roomId: item.roomId);
+                      },
+                      onLongPress: () {
+                        setFollowTagDialog(item);
+                      },
+                    );
+                  }
+
+                  return FollowUserItem(
+                    item: item,
+                    onRemove: () {
+                      controller.removeItem(item);
+                    },
+                    onTap: () {
+                      AppNavigator.toLiveRoomDetail(
+                          site: site, roomId: item.roomId);
+                    },
+                    onLongPress: () {
+                      setFollowTagDialog(item);
+                    },
+                  );
+                },
+              );
+            }),
           ),
         ],
       ),

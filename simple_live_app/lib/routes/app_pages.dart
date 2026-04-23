@@ -44,6 +44,9 @@ import 'package:simple_live_app/modules/settings/other/other_settings_controller
 import 'package:simple_live_app/modules/settings/other/other_settings_page.dart';
 import 'package:simple_live_app/modules/settings/play_settings_page.dart';
 
+import 'package:simple_live_app/modules/settings/custom_sort_manager_page.dart';
+import 'package:simple_live_app/modules/settings/custom_sort_manager_controller.dart';
+
 import '../modules/indexed/indexed_page.dart';
 import 'route_path.dart';
 
@@ -226,7 +229,7 @@ class AppPages {
       page: () => const RemoteSyncWebDAVPage(),
       bindings: [
         BindingsBuilder.put(
-              () => RemoteSyncWebDAVController(),
+          () => RemoteSyncWebDAVController(),
         ),
       ],
     ),
@@ -247,6 +250,15 @@ class AppPages {
     GetPage(
       name: RoutePath.kSettingsFollow,
       page: () => const FollowSettingsPage(),
+    ),
+    //自定义排序管理
+    GetPage(
+      name: RoutePath.kCustomSortManager,
+      page: () => const CustomSortManagerPage(),
+      bindings: [
+        BindingsBuilder.put(
+            () => CustomSortManagerController(sortId: Get.arguments)),
+      ],
     ),
   ];
 }

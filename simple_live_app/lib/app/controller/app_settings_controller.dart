@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'dart:convert';
 import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
+import 'package:simple_live_app/models/db/follow_user_sort.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -151,7 +153,29 @@ class AppSettingsController extends GetxController {
         .getValue(LocalStorageService.kUpdateFollowDuration, 10);
 
     updateFollowThreadCount.value = LocalStorageService.instance
-        .getValue(LocalStorageService.kUpdateFollowThreadCount, 0);  // 默认 0 = 自动
+        .getValue(LocalStorageService.kUpdateFollowThreadCount, 0); // 默认 0 = 自动
+
+    followListStyle.value = LocalStorageService.instance
+        .getValue(LocalStorageService.kFollowListStyle, 0);
+
+    followSortMode.value = LocalStorageService.instance
+        .getValue(LocalStorageService.kFollowSortMode, 0);
+
+    currentCustomSortId.value = LocalStorageService.instance
+        .getValue(LocalStorageService.kCurrentCustomSortId, "");
+
+    String customSortListJson = LocalStorageService.instance
+        .getValue(LocalStorageService.kCustomSortList, "[]");
+    try {
+      List decoded = jsonDecode(customSortListJson);
+      customSortList.value =
+          decoded.map((e) => FollowUserSort.fromJson(e)).toList();
+    } catch (e) {
+      Log.logPrint("读取自定义排序失败: $e");
+    }
+
+    liveTitleColor.value = LocalStorageService.instance
+        .getValue(LocalStorageService.kLiveTitleColor, 0);
 
     initSiteSort();
     initHomeSort();
@@ -523,6 +547,41 @@ class AppSettingsController extends GetxController {
     updateFollowThreadCount.value = e;
     LocalStorageService.instance
         .setValue(LocalStorageService.kUpdateFollowThreadCount, e);
+  }
+
+  var followListStyle = 0.obs;
+  void setFollowListStyle(int e) {
+    followListStyle.value = e;
+    LocalStorageService.instance
+        .setValue(LocalStorageService.kFollowListStyle, e);
+  }
+
+  var followSortMode = 0.obs;
+  void setFollowSortMode(int e) {
+    followSortMode.value = e;
+    LocalStorageService.instance
+        .setValue(LocalStorageService.kFollowSortMode, e);
+  }
+
+  var currentCustomSortId = "".obs;
+  void setCurrentCustomSortId(String e) {
+    currentCustomSortId.value = e;
+    LocalStorageService.instance
+        .setValue(LocalStorageService.kCurrentCustomSortId, e);
+  }
+
+  var customSortList = <FollowUserSort>[].obs;
+  void setCustomSortList(List<FollowUserSort> list) {
+    customSortList.value = list;
+    LocalStorageService.instance.setValue(LocalStorageService.kCustomSortList,
+        jsonEncode(list.map((e) => e.toJson()).toList()));
+  }
+
+  var liveTitleColor = 0.obs;
+  void setLiveTitleColor(int e) {
+    liveTitleColor.value = e;
+    LocalStorageService.instance
+        .setValue(LocalStorageService.kLiveTitleColor, e);
   }
 
   var playerForceHttps = false.obs;

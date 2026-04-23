@@ -111,8 +111,54 @@ class FollowService extends GetxService {
     }
     // 标签内排序
     curTagFollowList.sort(
-      (a, b) => b.liveStatus.value.compareTo(a.liveStatus.value),
+      (a, b) => _compareFollowUser(a, b),
     );
+  }
+
+  int _compareFollowUser(FollowUser a, FollowUser b) {
+    // 首先比较直播状态 (2=直播中, 1=未开播)
+    int statusCompare = b.liveStatus.value.compareTo(a.liveStatus.value);
+    if (statusCompare != 0) return statusCompare;
+
+    // 如果状态相同且都是直播中，则根据设置的排序模式进行二级排序
+    if (a.liveStatus.value == 2) {
+      int sortMode = AppSettingsController.instance.followSortMode.value;
+      if (sortMode == 1) {
+        // 按热度 (在线人数) 降序
+        int aOnline = a.liveOnline ?? 0;
+        int bOnline = b.liveOnline ?? 0;
+        return bOnline.compareTo(aOnline);
+      } else if (sortMode == 2) {
+        // 按开播时间 (时间戳) 降序 (最近开播的在前面)
+        int aTime = int.tryParse(a.liveStartTime ?? "0") ?? 0;
+        int bTime = int.tryParse(b.liveStartTime ?? "0") ?? 0;
+        return bTime.compareTo(aTime);
+      } else if (sortMode == 3) {
+        // 按自定义排序
+        String currentCustomSortId =
+            AppSettingsController.instance.currentCustomSortId.value;
+        var customSorts = AppSettingsController.instance.customSortList;
+        var customSort =
+            customSorts.firstWhereOrNull((e) => e.id == currentCustomSortId);
+
+        if (customSort != null) {
+          int indexA = customSort.userIds.indexOf(a.id);
+          int indexB = customSort.userIds.indexOf(b.id);
+
+          // 如果都不在列表中，保持原有相对顺序（数据库默认顺序，通常按添加时间）
+          if (indexA == -1 && indexB == -1) return 0;
+          // 如果 A 在列表中，B 不在，A 排在前面
+          if (indexB == -1) return -1;
+          // 如果 B 在列表中，A 不在，B 排在前面
+          if (indexA == -1) return 1;
+
+          // 如果都在列表中，比较它们在列表中的索引
+          return indexA.compareTo(indexB);
+        }
+      }
+    }
+    // 默认保持原有顺序
+    return 0;
   }
 
   // 添加关注
@@ -154,7 +200,8 @@ class FollowService extends GetxService {
   /// 获取最优并发数
   /// 根据 CPU 核心数和用户设置自动计算
   int getOptimalConcurrency() {
-    var userSetting = AppSettingsController.instance.updateFollowThreadCount.value;
+    var userSetting =
+        AppSettingsController.instance.updateFollowThreadCount.value;
 
     // 如果用户设置为 0，则自动根据 CPU 核心数计算
     if (userSetting == 0) {
@@ -232,8 +279,14 @@ class FollowService extends GetxService {
         // 只有正在直播时才查详细信息
         var detail = await site.liveSite.getRoomDetail(roomId: item.roomId);
         item.liveStartTime = detail.showTime;
+        item.liveCover = detail.cover;
+        item.liveTitle = detail.title;
+        item.liveOnline = detail.online;
       } else {
         item.liveStartTime = null;
+        item.liveCover = null;
+        item.liveTitle = null;
+        item.liveOnline = null;
       }
     } catch (e) {
       Log.logPrint(e);
@@ -249,7 +302,7 @@ class FollowService extends GetxService {
   }
 
   void filterData() {
-    followList.sort((a, b) => b.liveStatus.value.compareTo(a.liveStatus.value));
+    followList.sort((a, b) => _compareFollowUser(a, b));
     liveList.assignAll(followList.where((x) => x.liveStatus.value == 2));
     notLiveList.assignAll(followList.where((x) => x.liveStatus.value == 1));
     _updatedListController.add(0);

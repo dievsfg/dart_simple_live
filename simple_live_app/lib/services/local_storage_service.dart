@@ -168,6 +168,21 @@ class LocalStorageService extends GetxService {
   /// WebDAV_最后一次备份时间
   static const String kWebDAVLastRecoverTime = "kWebDAVLastRecoverTime";
 
+  /// 关注列表显示样式 0=列表 1=网格封面
+  static const String kFollowListStyle = "FollowListStyle";
+
+  /// 关注列表排序方式 0=默认 1=热度 2=时间 3=自定义
+  static const String kFollowSortMode = "FollowSortMode";
+
+  /// 自定义排序列表 JSON数据
+  static const String kCustomSortList = "CustomSortList";
+
+  /// 当前选中的自定义排序 ID
+  static const String kCurrentCustomSortId = "CurrentCustomSortId";
+
+  /// 直播标题颜色 0=跟随主题，其他=具体颜色的ARGB值
+  static const String kLiveTitleColor = "LiveTitleColor";
+
   late Box settingsBox;
   late Box<String> shieldBox;
 

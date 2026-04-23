@@ -75,4 +75,12 @@ class AppNavigator {
       },
     );
   }
+
+  /// 跳转至自定义排序管理
+  static Future toCustomSortManager(String? sortId) async {
+    await Get.toNamed(
+      RoutePath.kCustomSortManager,
+      arguments: sortId,
+    );
+  }
 }
